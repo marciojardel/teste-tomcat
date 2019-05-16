@@ -1,36 +1,25 @@
+#!/usr/bin/env groovy
+
 node {
-    def app
-
-    stage('Clone repository') {
-        /* Let's make sure we have the repository cloned to our workspace */
-
-        checkout scm
-    }
-
-    stage('Build image') {
-        /* This builds the actual image; synonymous to
-         * docker build on the command line */
-
-        app = docker.build("marciojardel/devops-tomcat8")
-    }
-
-    stage('Test image') {
-        /* Ideally, we would run a test framework against our image.
-         * For this example, we're using a Volkswagen-type approach ;-) */
-
-        app.inside {
-            sh 'echo "Tests passed"'
-        }
-    }
-
-    stage('Push image') {
-        /* Finally, we'll push the image with two tags:
-         * First, the incremental build number from Jenkins
-         * Second, the 'latest' tag.
-         * Pushing multiple tags is cheap, as all the layers are reused. */
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            app.push("${env.BUILD_NUMBER}")
-            app.push("latest")
-        }
-    }
-}
+	def app
+	
+	stage("Clone") {
+		git 'https://github.com/marciojardel/teste-tomcat.git'
+		}
+		
+	stage("Build") {
+		app = docker.build("marciojardel/devops-tomcat8")
+		}
+		
+	stage("Push") {
+		docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+				app.push("${env.BUILD_ID}")
+				app.push("latest")
+			}
+		}
+		
+	stage("Deploy") {
+		docker stop tomcat && \
+			docker rm tomcat && \
+			docker pull marciojardel/devops-tomcat8:1.0.0 && \
+			docker run -dit --name tomcat -p 8889:8080 marciojardel/devops-tomcat8:1.0.0
