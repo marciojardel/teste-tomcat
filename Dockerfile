@@ -7,3 +7,4 @@ COPY context.xml /usr/local/tomcat/webapps/manager/META-INF/context.xml
 COPY teste.war /usr/local/tomcat/webapps/
 COPY hello-world.war /usr/local/tomcat/webapps/
 COPY hello-ttt.war /usr/local/tomcat/webapps/
+COPY hello-wamp.war /usr/local/tomcat/webapps/
